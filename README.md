@@ -28,13 +28,15 @@ npm run dev                        # http://localhost:3000
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. Copy the URL + anon key + service-role key into `.env.local`.
-3. In the SQL editor, run `supabase/migrations/0001_init.sql`, then `supabase/seed.sql`.
-4. To make yourself an admin: sign up in the app, then in SQL run
+3. In the SQL editor, run the migrations in order:
+   `0001_init.sql`, `0002_functions.sql`, `0003_storage.sql`, then `seed.sql`.
+4. To make yourself an admin: sign up in the app (`/auth/registro`), then in SQL run
    `update public.profiles set role = 'admin' where id = '<your-user-id>';`
+   You can then manage products and orders at `/admin`.
 
 ### MercadoPago (Colombia)
 
-Create an app at [mercadopago.com.co/developers](https://www.mercadopago.com.co/developers), then put the access token + public key in `.env.local`. (Wired up in a later phase.)
+Create an app at [mercadopago.com.co/developers](https://www.mercadopago.com.co/developers), then put the access token + public key in `.env.local`. Set the webhook/notification URL to `https://<your-domain>/api/webhooks/mercadopago` and copy its secret into `MERCADOPAGO_WEBHOOK_SECRET`. Once these are set, an online-pay button appears in the cart and checkout works; without them the site falls back to WhatsApp ordering.
 
 ## Project structure
 
@@ -57,13 +59,13 @@ public/logo-mark.svg   # vector logo mark
 
 ## Roadmap
 
-1. ✅ Scaffold + brand system + DB schema (this)
-2. Storefront (catalog + product detail) from Supabase
-3. Cart + **WhatsApp order** → *can start selling here*
-4. Auth + customer accounts
-5. MercadoPago checkout (preference + webhook + stock)
-6. Admin panel (product CRUD + orders)
-7. Polish: SEO, emails, PDF receipts, analytics
+1. ✅ Scaffold + brand system + DB schema
+2. ✅ Storefront (catalog + product detail) from Supabase (local fallback)
+3. ✅ Cart + **WhatsApp order**
+4. ✅ Auth + customer accounts (`/cuenta`)
+5. ✅ MercadoPago checkout (preference + webhook + stock decrement)
+6. ✅ Admin panel (product/variant/image CRUD + orders) at `/admin`
+7. Polish: SEO/OpenGraph, transactional emails, PDF receipts, analytics
 
 ## Deploy
 

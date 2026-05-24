@@ -111,17 +111,27 @@ export default function CarritoPage() {
         </div>
       </div>
 
+      {process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY && (
+        <Link
+          href="/checkout"
+          className="mt-6 block rounded-full bg-brand-orange px-6 py-4 text-center text-lg font-semibold text-white shadow transition hover:bg-brand-orange-dark"
+        >
+          Pagar en línea (tarjeta / PSE)
+        </Link>
+      )}
       <a
         href={waLink}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-6 block rounded-full bg-brand-green px-6 py-4 text-center text-lg font-semibold text-white shadow transition hover:bg-brand-green-dark"
+        className="mt-3 block rounded-full bg-brand-green px-6 py-4 text-center text-lg font-semibold text-white shadow transition hover:bg-brand-green-dark"
       >
         Finalizar pedido por WhatsApp
       </a>
-      <p className="mt-3 text-center text-xs text-ink/40">
-        El pago en línea (MercadoPago) estará disponible pronto.
-      </p>
+      {!process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY && (
+        <p className="mt-3 text-center text-xs text-ink/40">
+          El pago en línea (MercadoPago) estará disponible pronto.
+        </p>
+      )}
     </section>
   );
 }

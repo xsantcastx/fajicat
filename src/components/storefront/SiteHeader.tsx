@@ -21,6 +21,9 @@ export function SiteHeader() {
           <Link href="/productos" className="transition hover:text-brand-orange">
             Productos
           </Link>
+          <Link href="/cuenta" className="transition hover:text-brand-orange">
+            Cuenta
+          </Link>
           <Link
             href="/carrito"
             className="relative transition hover:text-brand-orange"
