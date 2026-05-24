@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const sizes = [
   { size: "XS", price: "20.000" },
@@ -17,35 +18,47 @@ export default function Home() {
 
   return (
     <main className="flex flex-col">
-      <section className="flex flex-col items-center justify-center gap-6 px-6 py-20 text-center">
-        <span className="rounded-full bg-brand-blue/20 px-4 py-1 text-sm font-medium text-ink/80">
-          Animal Health · Medellín, Colombia
-        </span>
-        <h1 className="max-w-2xl text-4xl font-bold leading-tight text-ink sm:text-5xl">
-          Fajas postquirúrgicas para{" "}
-          <span className="bg-gradient-to-r from-brand-orange to-brand-green bg-clip-text text-transparent">
-            tu mascota
+      <section className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 md:grid-cols-2">
+        <div className="text-center md:text-left">
+          <span className="inline-block rounded-full bg-brand-blue/20 px-4 py-1 text-sm font-medium text-ink/80">
+            Animal Health · Medellín, Colombia
           </span>
-        </h1>
-        <p className="max-w-xl text-lg text-ink/70">
-          Comodidad y protección durante la recuperación de tu gato o perro.
-          Hechas con cariño en Colombia.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/productos"
-            className="rounded-full bg-brand-orange px-6 py-3 font-semibold text-white shadow transition hover:bg-brand-orange-dark"
-          >
-            Ver productos
-          </Link>
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full border border-ink/15 px-6 py-3 font-semibold text-ink transition hover:bg-ink/5"
-          >
-            Pedir por WhatsApp
-          </a>
+          <h1 className="mt-5 text-4xl font-bold leading-tight text-ink sm:text-5xl">
+            Fajas postquirúrgicas para{" "}
+            <span className="bg-gradient-to-r from-brand-orange to-brand-green bg-clip-text text-transparent">
+              tu mascota
+            </span>
+          </h1>
+          <p className="mt-5 text-lg text-ink/70">
+            Comodidad y protección durante la recuperación de tu gato o perro.
+            Hechas con cariño en Colombia.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3 md:justify-start">
+            <Link
+              href="/productos"
+              className="rounded-full bg-brand-orange px-6 py-3 font-semibold text-white shadow transition hover:bg-brand-orange-dark"
+            >
+              Ver productos
+            </Link>
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-ink/15 px-6 py-3 font-semibold text-ink transition hover:bg-ink/5"
+            >
+              Pedir por WhatsApp
+            </a>
+          </div>
+        </div>
+        <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-3xl shadow-lg">
+          <Image
+            src="/hero.jpg"
+            alt="Mascota con su faja postquirúrgica Fajicat"
+            fill
+            priority
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 40vw"
+          />
         </div>
       </section>
 
