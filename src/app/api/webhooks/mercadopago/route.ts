@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isMercadoPagoConfigured } from "@/lib/payments";
 import { mpClient } from "@/lib/mercadopago";
+import { notifyOwnerOrder } from "@/lib/notify";
 
 // Verifies the x-signature header per MercadoPago's spec.
 function verifySignature(request: Request, dataId: string): boolean {
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
   const admin = createAdminClient();
   const { data: order } = await admin
     .from("orders")
-    .select("id, status")
+    .select("id, status, total, contact_name, contact_phone")
     .eq("id", orderId)
     .maybeSingle();
   if (!order) return NextResponse.json({ ok: true });
@@ -111,7 +112,7 @@ export async function POST(request: Request) {
   if (newStatus === "paid") {
     const { data: items } = await admin
       .from("order_items")
-      .select("variant_id, quantity")
+      .select("variant_id, quantity, product_name, size, line_total")
       .eq("order_id", orderId);
     for (const it of items ?? []) {
       if (it.variant_id) {
@@ -121,6 +122,16 @@ export async function POST(request: Request) {
         });
       }
     }
+    await notifyOwnerOrder(
+      {
+        id: orderId,
+        total: Number(order.total),
+        contactName: order.contact_name,
+        contactPhone: order.contact_phone,
+        items: items ?? [],
+      },
+      "pagado",
+    );
   }
 
   return NextResponse.json({ ok: true });

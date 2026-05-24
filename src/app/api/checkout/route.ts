@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isMercadoPagoConfigured } from "@/lib/payments";
 import { mpClient } from "@/lib/mercadopago";
+import { shippingFor } from "@/lib/shipping";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -99,7 +100,8 @@ export async function POST(request: Request) {
     });
   }
 
-  const total = subtotal; // free shipping for now
+  const shipping = shippingFor(subtotal);
+  const total = subtotal + shipping;
 
   // Associate the order with the logged-in user, if any.
   let userId: string | null = null;
@@ -120,7 +122,7 @@ export async function POST(request: Request) {
       status: "pending",
       channel: "web",
       subtotal,
-      shipping: 0,
+      shipping,
       total,
       currency: "COP",
       contact_name: contact.name ?? null,
@@ -150,13 +152,26 @@ export async function POST(request: Request) {
   try {
     const pref = await new Preference(mpClient()).create({
       body: {
-        items: orderItems.map((oi, idx) => ({
-          id: String(idx),
-          title: `${oi.product_name} talla ${oi.size}`,
-          quantity: oi.quantity,
-          unit_price: oi.unit_price,
-          currency_id: "COP",
-        })),
+        items: [
+          ...orderItems.map((oi, idx) => ({
+            id: String(idx),
+            title: `${oi.product_name} talla ${oi.size}`,
+            quantity: oi.quantity,
+            unit_price: oi.unit_price,
+            currency_id: "COP",
+          })),
+          ...(shipping > 0
+            ? [
+                {
+                  id: "shipping",
+                  title: "Envío",
+                  quantity: 1,
+                  unit_price: shipping,
+                  currency_id: "COP",
+                },
+              ]
+            : []),
+        ],
         external_reference: order.id,
         back_urls: {
           success: `${SITE}/checkout/exito`,

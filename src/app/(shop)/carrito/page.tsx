@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart, cartTotal } from "@/lib/cart";
 import { formatCOP } from "@/lib/format";
+import { shippingFor } from "@/lib/shipping";
 
 const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "573145602688";
 
@@ -34,7 +35,9 @@ export default function CarritoPage() {
     );
   }
 
-  const total = cartTotal(items);
+  const subtotal = cartTotal(items);
+  const shipping = shippingFor(subtotal);
+  const total = subtotal + shipping;
   const lines = items
     .map(
       (i) =>
@@ -43,7 +46,9 @@ export default function CarritoPage() {
         )}`,
     )
     .join("\n");
-  const waText = `¡Hola Fajicat! Quiero hacer este pedido 🐾\n\n${lines}\n\nTotal: ${formatCOP(
+  const waText = `¡Hola Fajicat! Quiero hacer este pedido 🐾\n\n${lines}\n\nSubtotal: ${formatCOP(
+    subtotal,
+  )}\nEnvío: ${shipping === 0 ? "Gratis" : formatCOP(shipping)}\nTotal: ${formatCOP(
     total,
   )}`;
   const waLink = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waText)}`;
@@ -97,18 +102,28 @@ export default function CarritoPage() {
         ))}
       </ul>
 
-      <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-6">
+      <div className="mt-6 border-t border-ink/10 pt-6">
+        <div className="ml-auto max-w-xs space-y-1 text-sm">
+          <div className="flex justify-between text-ink/70">
+            <span>Subtotal</span>
+            <span>{formatCOP(subtotal)}</span>
+          </div>
+          <div className="flex justify-between text-ink/70">
+            <span>Envío</span>
+            <span>{shipping === 0 ? "Gratis" : formatCOP(shipping)}</span>
+          </div>
+          <div className="flex justify-between border-t border-ink/10 pt-2 text-lg font-bold text-ink">
+            <span>Total</span>
+            <span>{formatCOP(total)}</span>
+          </div>
+        </div>
         <button
           type="button"
           onClick={clear}
-          className="text-sm text-ink/50 transition hover:text-ink"
+          className="mt-4 text-sm text-ink/50 transition hover:text-ink"
         >
           Vaciar carrito
         </button>
-        <div className="text-right">
-          <p className="text-sm text-ink/60">Total</p>
-          <p className="text-2xl font-bold text-ink">{formatCOP(total)}</p>
-        </div>
       </div>
 
       {process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY && (

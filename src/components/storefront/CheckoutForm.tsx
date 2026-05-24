@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart, cartTotal } from "@/lib/cart";
 import { formatCOP } from "@/lib/format";
+import { shippingFor } from "@/lib/shipping";
 
 const input =
   "w-full rounded-xl border border-ink/15 px-4 py-2.5 text-sm outline-none transition focus:border-brand-orange";
@@ -31,7 +32,9 @@ export function CheckoutForm() {
     );
   }
 
-  const total = cartTotal(items);
+  const subtotal = cartTotal(items);
+  const shipping = shippingFor(subtotal);
+  const total = subtotal + shipping;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -119,9 +122,19 @@ export function CheckoutForm() {
             </li>
           ))}
         </ul>
-        <div className="mt-4 flex justify-between border-t border-ink/10 pt-4">
-          <span className="font-semibold text-ink">Total</span>
-          <span className="text-xl font-bold text-ink">{formatCOP(total)}</span>
+        <div className="mt-4 space-y-1 border-t border-ink/10 pt-4 text-sm">
+          <div className="flex justify-between text-ink/70">
+            <span>Subtotal</span>
+            <span>{formatCOP(subtotal)}</span>
+          </div>
+          <div className="flex justify-between text-ink/70">
+            <span>Envío</span>
+            <span>{shipping === 0 ? "Gratis" : formatCOP(shipping)}</span>
+          </div>
+          <div className="flex justify-between pt-1 text-lg font-bold text-ink">
+            <span>Total</span>
+            <span>{formatCOP(total)}</span>
+          </div>
         </div>
       </aside>
     </div>
