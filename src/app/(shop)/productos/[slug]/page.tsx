@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductBySlug, getProducts } from "@/lib/catalog";
-import { ProductThumb } from "@/components/storefront/ProductThumb";
+import { ProductGallery } from "@/components/storefront/ProductGallery";
 import { AddToCart } from "@/components/storefront/AddToCart";
 import { SizeGuide } from "@/components/storefront/SizeGuide";
 
@@ -35,9 +35,7 @@ export default async function ProductPage({
   return (
     <section className="mx-auto max-w-5xl px-5 py-12">
       <div className="grid gap-10 md:grid-cols-2">
-        <div className="relative aspect-square overflow-hidden rounded-3xl border border-ink/10 bg-white">
-          <ProductThumb product={product} />
-        </div>
+        <ProductGallery product={product} />
         <div>
           {product.category && (
             <span className="text-sm font-medium text-brand-green-dark">
