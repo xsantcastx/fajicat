@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# oh-my-claudecode
+/.omc
+
+# supabase
+/supabase/.branches
+/supabase/.temp

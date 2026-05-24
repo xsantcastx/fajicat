@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 130" role="img" aria-label="Fajicat">
+  <defs>
+    <linearGradient id="catBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ae7a55" />
+      <stop offset="100%" stop-color="#875534" />
+    </linearGradient>
+    <linearGradient id="blanket" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9bd9f2" />
+      <stop offset="100%" stop-color="#57b4de" />
+    </linearGradient>
+  </defs>
+
+  <!-- tail curling behind the body -->
+  <path d="M138 92 C 162 110 138 132 96 122" fill="none" stroke="#7a4e30" stroke-width="16" stroke-linecap="round" />
+
+  <!-- curled body -->
+  <ellipse cx="92" cy="86" rx="58" ry="34" fill="url(#catBody)" />
+
+  <!-- blanket / faja draped over the back -->
+  <path d="M58 64 C 92 50 132 56 146 78 C 138 86 122 86 112 80 C 92 68 70 70 56 82 C 52 76 52 70 58 64 Z" fill="url(#blanket)" />
+  <path d="M78 60 C 98 56 120 58 136 70" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="3" stroke-linecap="round" />
+
+  <!-- head -->
+  <circle cx="50" cy="82" r="26" fill="#9c6b4c" />
+
+  <!-- ears -->
+  <path d="M30 64 L 34 44 L 50 58 Z" fill="#9c6b4c" />
+  <path d="M54 56 L 70 44 L 72 64 Z" fill="#9c6b4c" />
+  <path d="M34 60 L 37 50 L 45 58 Z" fill="#e79a86" />
+  <path d="M58 56 L 67 49 L 68 60 Z" fill="#e79a86" />
+
+  <!-- sleeping eye -->
+  <path d="M34 82 q 8 7 18 1" fill="none" stroke="#5a3a22" stroke-width="3" stroke-linecap="round" />
+
+  <!-- nose + mouth -->
+  <path d="M24 86 l 8 -3 0 6 z" fill="#5a3a22" />
+  <path d="M30 92 q 4 4 8 0" fill="none" stroke="#5a3a22" stroke-width="2" stroke-linecap="round" />
+
+  <!-- whiskers -->
+  <path d="M22 84 h -12 M22 90 h -11" fill="none" stroke="#5a3a22" stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+</svg>

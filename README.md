@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fajicat 🐾
 
-## Getting Started
+Tienda en línea de **fajas postquirúrgicas para mascotas** (gatos y perros) — el e-commerce de [@faji_cat](https://www.instagram.com/faji_cat). Medellín, Colombia.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + **React 19** + **TypeScript**
+- **Tailwind CSS v4** (brand tokens in `src/app/globals.css`)
+- **Supabase** — Postgres + Auth + Storage (with Row-Level Security)
+- **MercadoPago** — pagos (tarjetas / PSE / Efecty)
+- **WhatsApp** — canal de pedidos alterno
+- Hosting: **Vercel** + **Supabase**
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Install dependencies
+npm install
+
+# 2. Environment
+cp .env.local.example .env.local   # then fill in the values
+
+# 3. Run the dev server
+npm run dev                        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Supabase
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Create a project at [supabase.com](https://supabase.com).
+2. Copy the URL + anon key + service-role key into `.env.local`.
+3. In the SQL editor, run `supabase/migrations/0001_init.sql`, then `supabase/seed.sql`.
+4. To make yourself an admin: sign up in the app, then in SQL run
+   `update public.profiles set role = 'admin' where id = '<your-user-id>';`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### MercadoPago (Colombia)
 
-## Learn More
+Create an app at [mercadopago.com.co/developers](https://www.mercadopago.com.co/developers), then put the access token + public key in `.env.local`. (Wired up in a later phase.)
 
-To learn more about Next.js, take a look at the following resources:
+## Project structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+  app/                 # routes (App Router) + icon.svg favicon
+  components/brand/    # Logo and brand components
+  lib/supabase/        # client.ts (browser) · server.ts (server)
+supabase/
+  migrations/          # 0001_init.sql — schema + RLS
+  seed.sql             # categories, product, size variants (COP prices)
+public/logo-mark.svg   # vector logo mark
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Data model notes
 
-## Deploy on Vercel
+- **Catalog** (`products`, `product_variants`, `categories`, `product_images`) is publicly readable when `status = 'active'`; only admins can write.
+- **Orders** are created **server-side** with the service-role key (prices/stock validated there), so there is no broad client INSERT policy. Customers can read only their own orders; admins read all.
+- `order_items` store price/name/size **snapshots** so historical orders never change when products do.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Roadmap
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. ✅ Scaffold + brand system + DB schema (this)
+2. Storefront (catalog + product detail) from Supabase
+3. Cart + **WhatsApp order** → *can start selling here*
+4. Auth + customer accounts
+5. MercadoPago checkout (preference + webhook + stock)
+6. Admin panel (product CRUD + orders)
+7. Polish: SEO, emails, PDF receipts, analytics
+
+## Deploy
+
+Push to GitHub → import on [Vercel](https://vercel.com/new), add the same env vars, and deploy. Point the Supabase project to production keys.

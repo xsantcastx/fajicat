@@ -1,26 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafaf7;
+  --foreground: #333b3b;
+}
+
+/* Fajicat brand palette — generates utilities like bg-brand-orange, text-brand-green */
+@theme {
+  --color-brand-orange: #ee7f1a;
+  --color-brand-orange-dark: #d96e0c;
+  --color-brand-green: #8dbf3c;
+  --color-brand-green-dark: #6fa02a;
+  --color-brand-blue: #6fc5e8;
+  --color-brand-brown: #9c6b4c;
+  --color-ink: #333b3b;
+  --color-cream: #fafaf7;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-poppins);
+  --font-script: var(--font-pacifico);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), system-ui, sans-serif;
 }
