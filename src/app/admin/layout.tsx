@@ -35,7 +35,7 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-cream">
-      <aside className="hidden w-56 flex-col border-r border-ink/10 bg-white p-5 sm:flex">
+      <aside className="hidden w-56 flex-col border-r border-ink/10 bg-white p-5 sm:flex print:hidden">
         <Link href="/admin">
           <Logo showTagline={false} />
         </Link>

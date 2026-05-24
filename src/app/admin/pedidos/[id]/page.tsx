@@ -44,9 +44,17 @@ export default async function OrderDetail({
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold text-ink">
-        Pedido #{order.id.slice(0, 8)}
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-ink">
+          Pedido #{order.id.slice(0, 8)}
+        </h1>
+        <a
+          href={`/admin/pedidos/${order.id}/factura`}
+          className="rounded-full border border-brand-orange px-4 py-2 text-sm font-semibold text-brand-orange transition hover:bg-brand-orange/10"
+        >
+          Ver factura
+        </a>
+      </div>
 
       <div className="rounded-2xl border border-ink/10 bg-white p-6">
         <h2 className="font-bold text-ink">Productos</h2>
