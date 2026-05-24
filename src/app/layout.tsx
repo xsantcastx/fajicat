@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Pacifico } from "next/font/google";
+import { Analytics } from "@/components/Analytics";
+import { MetaPixel } from "@/components/MetaPixel";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -58,6 +60,8 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-cream text-ink">
         {children}
+        <Analytics />
+        <MetaPixel />
       </body>
     </html>
   );

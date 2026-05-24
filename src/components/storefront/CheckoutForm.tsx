@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCart, cartTotal } from "@/lib/cart";
 import { formatCOP } from "@/lib/format";
 import { shippingFor } from "@/lib/shipping";
-import { sendOrderEmail } from "@/lib/emailjs";
+import { sendOrderEmail, sendCustomerEmail } from "@/lib/emailjs";
 
 const input =
   "w-full rounded-xl border border-ink/15 px-4 py-2.5 text-sm outline-none transition focus:border-brand-orange";
@@ -68,19 +68,26 @@ export function CheckoutForm() {
         setLoading(false);
         return;
       }
+      const summary =
+        items
+          .map(
+            (i) =>
+              `${i.quantity} × ${i.productName} (${i.size}) — ${formatCOP(
+                i.unitPrice * i.quantity,
+              )}`,
+          )
+          .join("\n") +
+        `\nEnvío: ${shipping === 0 ? "Gratis" : formatCOP(shipping)}\nTotal: ${formatCOP(total)}`;
       await sendOrderEmail({
         customer: contact.name,
         phone: contact.phone,
         channel: "En línea",
-        order:
-          items
-            .map(
-              (i) =>
-                `${i.quantity} × ${i.productName} (${i.size}) — ${formatCOP(
-                  i.unitPrice * i.quantity,
-                )}`,
-            )
-            .join("\n") + `\nTotal: ${formatCOP(total)}`,
+        order: summary,
+      });
+      await sendCustomerEmail({
+        to: contact.email,
+        customer: contact.name,
+        order: summary,
       });
       window.location.href = data.url;
     } catch {

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getProductBySlug, getProducts } from "@/lib/catalog";
 import { ProductThumb } from "@/components/storefront/ProductThumb";
 import { AddToCart } from "@/components/storefront/AddToCart";
+import { SizeGuide } from "@/components/storefront/SizeGuide";
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -54,6 +55,7 @@ export default async function ProductPage({
           </div>
         </div>
       </div>
+      <SizeGuide />
     </section>
   );
 }
