@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCart, cartTotal } from "@/lib/cart";
 import { formatCOP } from "@/lib/format";
 import { shippingFor } from "@/lib/shipping";
+import { sendOrderEmail } from "@/lib/emailjs";
 
 const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "573145602688";
 
@@ -138,6 +139,16 @@ export default function CarritoPage() {
         href={waLink}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() =>
+          sendOrderEmail({
+            customer: "Cliente (WhatsApp)",
+            phone: "",
+            channel: "WhatsApp",
+            order: `${lines}\nSubtotal: ${formatCOP(subtotal)}\nEnvío: ${
+              shipping === 0 ? "Gratis" : formatCOP(shipping)
+            }\nTotal: ${formatCOP(total)}`,
+          })
+        }
         className="mt-3 block rounded-full bg-brand-green px-6 py-4 text-center text-lg font-semibold text-white shadow transition hover:bg-brand-green-dark"
       >
         Finalizar pedido por WhatsApp

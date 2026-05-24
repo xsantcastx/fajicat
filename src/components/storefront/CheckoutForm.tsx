@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCart, cartTotal } from "@/lib/cart";
 import { formatCOP } from "@/lib/format";
 import { shippingFor } from "@/lib/shipping";
+import { sendOrderEmail } from "@/lib/emailjs";
 
 const input =
   "w-full rounded-xl border border-ink/15 px-4 py-2.5 text-sm outline-none transition focus:border-brand-orange";
@@ -67,6 +68,20 @@ export function CheckoutForm() {
         setLoading(false);
         return;
       }
+      await sendOrderEmail({
+        customer: contact.name,
+        phone: contact.phone,
+        channel: "En línea",
+        order:
+          items
+            .map(
+              (i) =>
+                `${i.quantity} × ${i.productName} (${i.size}) — ${formatCOP(
+                  i.unitPrice * i.quantity,
+                )}`,
+            )
+            .join("\n") + `\nTotal: ${formatCOP(total)}`,
+      });
       window.location.href = data.url;
     } catch {
       setError("No se pudo conectar. Inténtalo de nuevo.");
