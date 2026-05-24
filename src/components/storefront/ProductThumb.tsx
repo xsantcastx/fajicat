@@ -15,13 +15,13 @@ export function ProductThumb({ product }: { product: Product }) {
     );
   }
   return (
-    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue/15 to-brand-green/15">
+    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue/10 to-brand-green/10 p-6">
       <Image
-        src="/logo-mark.svg"
+        src="/logo.jpg"
         alt={product.name}
-        width={130}
-        height={104}
-        className="opacity-80"
+        width={470}
+        height={215}
+        className="h-auto w-4/5 mix-blend-multiply opacity-95"
       />
     </div>
   );
