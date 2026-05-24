@@ -35,7 +35,7 @@ export default function PrivacidadPage() {
       <h2 className="pt-4 text-xl font-semibold text-ink">Tus derechos</h2>
       <p>
         Puedes conocer, actualizar, rectificar o solicitar la supresión de tus
-        datos escribiéndonos a Fajicat@gmail.com o al 314 560 2688.
+        datos escribiéndonos a mariana.rtp@gmail.com o al 314 560 2688.
       </p>
 
       <p className="pt-6 text-sm text-ink/50">

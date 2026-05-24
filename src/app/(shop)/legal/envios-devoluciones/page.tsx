@@ -35,7 +35,7 @@ export default function EnviosPage() {
 
       <h2 className="pt-4 text-xl font-semibold text-ink">Cómo solicitarlo</h2>
       <p>
-        Escríbenos por WhatsApp al 314 560 2688 o a Fajicat@gmail.com con tu
+        Escríbenos por WhatsApp al 314 560 2688 o a mariana.rtp@gmail.com con tu
         número de pedido y te guiamos en el proceso.
       </p>
 

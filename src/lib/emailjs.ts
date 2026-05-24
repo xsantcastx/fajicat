@@ -5,7 +5,7 @@ import emailjs from "@emailjs/browser";
 const SERVICE = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
 const TEMPLATE = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
-const OWNER = process.env.NEXT_PUBLIC_OWNER_EMAIL ?? "Fajicat@gmail.com";
+const OWNER = process.env.NEXT_PUBLIC_OWNER_EMAIL ?? "mariana.rtp123@gmail.com";
 
 export function emailjsReady() {
   return Boolean(SERVICE && TEMPLATE && PUBLIC_KEY);

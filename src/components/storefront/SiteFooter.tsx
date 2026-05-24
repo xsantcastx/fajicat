@@ -31,7 +31,7 @@ export function SiteFooter() {
       <p className="mt-5">
         © {new Date().getFullYear()} Fajicat · Medellín, Colombia
       </p>
-      <p className="mt-1">Cel 314 560 2688 · Fajicat@gmail.com</p>
+      <p className="mt-1">Cel 314 560 2688 · mariana.rtp@gmail.com</p>
     </footer>
   );
 }

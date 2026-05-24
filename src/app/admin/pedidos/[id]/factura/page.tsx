@@ -51,7 +51,7 @@ export default async function FacturaPage({
             <p className="font-semibold text-ink">Comodidad para tu mascota</p>
             <p className="text-ink/60">Medellín, Ant.</p>
             <p className="text-ink/60">Cel 314 560 2688</p>
-            <p className="text-ink/60">Fajicat@gmail.com</p>
+            <p className="text-ink/60">mariana.rtp@gmail.com</p>
           </div>
         </div>
 

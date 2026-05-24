@@ -43,7 +43,7 @@ export default function TerminosPage() {
 
       <h2 className="pt-4 text-xl font-semibold text-ink">Contacto</h2>
       <p>
-        Cel 314 560 2688 · Fajicat@gmail.com · Medellín, Colombia.
+        Cel 314 560 2688 · mariana.rtp@gmail.com · Medellín, Colombia.
       </p>
 
       <p className="pt-6 text-sm text-ink/50">
