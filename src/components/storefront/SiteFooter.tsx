@@ -12,6 +12,12 @@ export function SiteFooter() {
         <Link href="/nosotros" className="transition hover:text-brand-orange">
           Nosotros
         </Link>
+        <Link href="/contacto" className="transition hover:text-brand-orange">
+          Contacto
+        </Link>
+        <Link href="/faq" className="transition hover:text-brand-orange">
+          Preguntas frecuentes
+        </Link>
         <Link href="/legal/terminos" className="transition hover:text-brand-orange">
           Términos
         </Link>

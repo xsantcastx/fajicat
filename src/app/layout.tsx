@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Pacifico } from "next/font/google";
 import { Analytics } from "@/components/Analytics";
 import { MetaPixel } from "@/components/MetaPixel";
+import { CookieConsent } from "@/components/CookieConsent";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -62,6 +63,7 @@ export default function RootLayout({
         {children}
         <Analytics />
         <MetaPixel />
+        <CookieConsent />
       </body>
     </html>
   );
