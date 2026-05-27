@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "@/components/admin/PrintButton";
+import { SendInvoiceButton } from "@/components/admin/SendInvoiceButton";
 
 export const dynamic = "force-dynamic";
 
@@ -125,6 +126,17 @@ export default async function FacturaPage({
     year: "2-digit",
   });
 
+  // Pull client email if this order is linked to a saved client.
+  let clientEmail: string | null = order.contact_email ?? null;
+  if (order.client_id) {
+    const { data: c } = await supabase
+      .from("clients")
+      .select("email")
+      .eq("id", order.client_id)
+      .maybeSingle();
+    if (c?.email) clientEmail = c.email;
+  }
+
   // Aggregate quantities and totals per talla.
   const rows = SIZES.map((s) => {
     const itemsForSize = items.filter((i) => i.size === s);
@@ -147,7 +159,31 @@ export default async function FacturaPage({
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
-      <div className="mb-4 flex justify-end print:hidden">
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-3 print:hidden">
+        <SendInvoiceButton
+          to={clientEmail ?? ""}
+          customer={clientName}
+          date={date}
+          items={
+            rows
+              .filter((r) => r.quantity > 0)
+              .map(
+                (r) =>
+                  `${r.quantity} × ${r.size === "XL" ? "Talla XL" : `Faja talla ${r.size}`} — ${formatCOP(r.line_total)}`,
+              )
+              .join("\n") || "—"
+          }
+          subtotal={formatCOP(subtotal)}
+          total={formatCOP(
+            order.promo_total != null ? Number(order.promo_total) : total,
+          )}
+          total_label={
+            order.promo_total != null &&
+            Number(order.promo_total) !== subtotal
+              ? "Total con promo"
+              : "Total"
+          }
+        />
         <PrintButton />
       </div>
 
