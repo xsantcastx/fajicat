@@ -51,7 +51,6 @@ const styles = `
 .factura-page .corner-tl { position: absolute; top: 0; left: 0; width: 14mm; height: 14mm; background: #F39C2D; }
 .factura-page .corner-tl-tab { position: absolute; top: 14mm; left: 0; width: 4mm; height: 14mm; background: #F39C2D; }
 .factura-page .corner-tr { position: absolute; top: 4mm; right: 0; width: 42mm; height: 16mm; background: #8BC34A; }
-.factura-page .dash-right { position: absolute; top: 0; right: 5mm; height: 100%; border-right: 2px dashed #E74C3C; }
 
 /* Footer */
 .factura-page .footer-bar { position: absolute; bottom: 6mm; left: 0; right: 0; height: 5mm; background: #8BC34A; }
@@ -191,7 +190,6 @@ export default async function FacturaPage({
         <div className="corner-tl"></div>
         <div className="corner-tl-tab"></div>
         <div className="corner-tr"></div>
-        <div className="dash-right"></div>
 
         <header>
           <div className="brand">FAJICAT</div>
