@@ -28,11 +28,37 @@ npm run dev                        # http://localhost:3000
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. Copy the URL + anon key + service-role key into `.env.local`.
-3. In the SQL editor, run the migrations in order:
-   `0001_init.sql`, `0002_functions.sql`, `0003_storage.sql`, then `seed.sql`.
+3. **Apply migrations** (one-time per environment) — either:
+   - **Recommended — via the Supabase CLI** (already installed as a dev dep):
+     ```bash
+     npx supabase login                                # opens browser; one-time
+     npx supabase link --project-ref <your-project-ref>
+     npx supabase db push                              # applies migrations + seed
+     ```
+   - **Or paste manually:** open each file in [`supabase/migrations/`](supabase/migrations/) in numeric order in the Supabase SQL editor, then [`supabase/seed.sql`](supabase/seed.sql).
 4. To make yourself an admin: sign up in the app (`/auth/registro`), then in SQL run
    `update public.profiles set role = 'admin' where id = '<your-user-id>';`
    You can then manage products and orders at `/admin`.
+
+### Migration workflow (Supabase CLI)
+
+```bash
+# Create a new migration file
+npx supabase migration new add_something
+# ...edit supabase/migrations/<timestamp>_add_something.sql...
+
+# Apply it to the linked Supabase project
+npx supabase db push
+
+# Status
+npx supabase migration list
+```
+
+If migrations were applied manually before adopting the CLI, **baseline them** so push doesn't try to re-run them:
+
+```bash
+npx supabase migration repair --status applied 0001 0002 0003 0004
+```
 
 ### MercadoPago (Colombia)
 
