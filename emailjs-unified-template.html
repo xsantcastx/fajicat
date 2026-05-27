@@ -1,0 +1,66 @@
+<!--
+  Fajicat — UNIFIED EmailJS template (works for both order notifications and invoices).
+  Paste this into template_ujvjv2g (replace the current HTML).
+  Template settings:
+    Subject:    {{subject}}
+    To Email:   {{to_email}}
+    From Name:  Fajicat
+  Variables used by the template:
+    {{heading}} {{intro}} {{meta_label}} {{meta_value}} {{body_label}} {{body}} {{footer}}
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fafaf7;margin:0;padding:24px 0;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #eeeeee;border-radius:16px;overflow:hidden;">
+        <tr>
+          <td style="background:#ee7f1a;background:linear-gradient(135deg,#ee7f1a 0%,#8dbf3c 100%);padding:26px 28px;">
+            <span style="color:#ffffff;font-size:26px;font-weight:bold;letter-spacing:0.5px;">Fajicat</span>
+            <div style="color:#ffffff;opacity:0.92;font-size:13px;margin-top:2px;">Comodidad para tu mascota</div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:28px 28px 6px;">
+            <h1 style="margin:0;font-size:20px;color:#333b3b;">{{heading}}</h1>
+            <p style="margin:8px 0 0;color:#777777;font-size:14px;">{{intro}}</p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:14px 28px 6px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fafaf7;border-radius:12px;">
+              <tr>
+                <td style="padding:14px 18px;font-size:13px;color:#555;">
+                  <div style="color:#999;font-size:11px;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;">{{meta_label}}</div>
+                  <div style="font-weight:bold;color:#333;">{{meta_value}}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:14px 28px 6px;">
+            <div style="color:#999999;font-size:11px;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">{{body_label}}</div>
+            <div style="white-space:pre-line;background:#ffffff;border:1px solid #eeeeee;border-radius:12px;padding:16px 18px;font-size:14px;line-height:1.7;color:#333b3b;">{{body}}</div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:14px 28px 6px;">
+            <div style="white-space:pre-line;font-size:13px;color:#555;line-height:1.6;">{{footer}}</div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:22px 28px 28px;">
+            <div style="border-top:1px solid #eeeeee;padding-top:16px;text-align:center;color:#999999;font-size:12px;line-height:1.6;">
+              Fajicat · Animal Health · Medellín, Colombia<br>
+              Cel 314 560 2688 · mariana.rtp@gmail.com
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
