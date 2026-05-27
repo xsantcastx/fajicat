@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createInvoice } from "@/app/admin/actions";
+import { SubmitButton } from "./SubmitButton";
 
 const SIZES = ["XS", "S", "M", "L", "XL"] as const;
 const PRICES: Record<string, number> = {
@@ -137,13 +138,9 @@ export function InvoiceForm({ clients }: { clients: Client[] }) {
         className={input}
       />
 
-      <button
-        type="submit"
-        disabled={subtotal === 0}
-        className="rounded-full bg-brand-orange px-6 py-3 font-semibold text-white shadow disabled:opacity-50"
-      >
+      <SubmitButton disabled={subtotal === 0} pendingText="Creando factura…">
         Crear factura
-      </button>
+      </SubmitButton>
     </form>
   );
 }

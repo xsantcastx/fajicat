@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { createClientAction } from "@/app/admin/actions";
+import { SubmitButton } from "@/components/admin/SubmitButton";
 
 export const dynamic = "force-dynamic";
 
@@ -14,20 +16,31 @@ export default async function NuevoCliente({
 
   return (
     <div className="max-w-xl">
-      <h1 className="text-2xl font-bold text-ink">Nuevo cliente</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-ink">Nuevo cliente</h1>
+        <Link
+          href="/admin/clientes"
+          className="text-sm text-ink/60 hover:text-ink"
+        >
+          ← Volver
+        </Link>
+      </div>
+
       {sp.error && (
         <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
           {sp.error}
         </p>
       )}
+
       <form action={createClientAction} className="mt-6 space-y-4">
         <input
           name="name"
           required
           placeholder="Nombre (ej. Veterinaria Monkey)"
           className={input}
+          autoFocus
         />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <input name="phone" placeholder="Teléfono" className={input} />
           <input
             name="email"
@@ -43,9 +56,7 @@ export default async function NuevoCliente({
           placeholder="Notas (opcional)"
           className={input}
         />
-        <button className="rounded-full bg-brand-orange px-6 py-3 font-semibold text-white">
-          Crear cliente
-        </button>
+        <SubmitButton pendingText="Creando…">Crear cliente</SubmitButton>
       </form>
     </div>
   );

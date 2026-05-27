@@ -150,7 +150,23 @@ export async function createClientAction(formData: FormData) {
   const supabase = await requireAdmin();
   const name = String(formData.get("name") ?? "").trim();
   if (!name) {
-    redirect(`/admin/clientes/nuevo?error=${encodeURIComponent("El nombre es obligatorio")}`);
+    redirect(
+      `/admin/clientes/nuevo?error=${encodeURIComponent("El nombre es obligatorio")}`,
+    );
+  }
+  // Reject duplicate names (case-insensitive) so the same client isn't
+  // created twice by accident (e.g., double-click on the submit button).
+  const { data: existing } = await supabase
+    .from("clients")
+    .select("id")
+    .ilike("name", name)
+    .limit(1);
+  if (existing && existing.length > 0) {
+    redirect(
+      `/admin/clientes/nuevo?error=${encodeURIComponent(
+        `Ya existe un cliente llamado "${name}". Edítalo desde la lista o usa un nombre distinto.`,
+      )}`,
+    );
   }
   const phone = String(formData.get("phone") ?? "") || null;
   const email = String(formData.get("email") ?? "") || null;
@@ -161,10 +177,64 @@ export async function createClientAction(formData: FormData) {
     .from("clients")
     .insert({ name, phone, email, address, notes });
   if (error) {
-    redirect(`/admin/clientes/nuevo?error=${encodeURIComponent(error.message)}`);
+    redirect(
+      `/admin/clientes/nuevo?error=${encodeURIComponent(error.message)}`,
+    );
   }
   revalidatePath("/admin/clientes");
-  redirect("/admin/clientes");
+  redirect(`/admin/clientes?created=${encodeURIComponent(name)}`);
+}
+
+export async function updateClientAction(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/admin/clientes");
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) {
+    redirect(
+      `/admin/clientes/${id}?error=${encodeURIComponent("El nombre es obligatorio")}`,
+    );
+  }
+  // Block renaming to match a different client's name.
+  const { data: clash } = await supabase
+    .from("clients")
+    .select("id")
+    .ilike("name", name)
+    .neq("id", id)
+    .limit(1);
+  if (clash && clash.length > 0) {
+    redirect(
+      `/admin/clientes/${id}?error=${encodeURIComponent(`Ya existe otro cliente llamado "${name}".`)}`,
+    );
+  }
+  const phone = String(formData.get("phone") ?? "") || null;
+  const email = String(formData.get("email") ?? "") || null;
+  const address = String(formData.get("address") ?? "") || null;
+  const notes = String(formData.get("notes") ?? "") || null;
+
+  const { error } = await supabase
+    .from("clients")
+    .update({ name, phone, email, address, notes })
+    .eq("id", id);
+  if (error) {
+    redirect(
+      `/admin/clientes/${id}?error=${encodeURIComponent(error.message)}`,
+    );
+  }
+  revalidatePath("/admin/clientes");
+  revalidatePath(`/admin/clientes/${id}`);
+  redirect(`/admin/clientes/${id}?saved=1`);
+}
+
+export async function deleteClientAction(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (id) {
+    // Past orders for this client survive (client_id is set to null by FK).
+    await supabase.from("clients").delete().eq("id", id);
+  }
+  revalidatePath("/admin/clientes");
+  redirect("/admin/clientes?deleted=1");
 }
 
 // ----- Invoices (admin-created orders for stored clients) -----
