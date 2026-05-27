@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { updateOrderStatus } from "@/app/admin/actions";
 import { formatCOP } from "@/lib/format";
+import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 
 export const dynamic = "force-dynamic";
 
@@ -23,10 +25,13 @@ type Item = {
 
 export default async function OrderDetail({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
   const supabase = await createClient();
   const { data: order } = await supabase
     .from("orders")
@@ -44,17 +49,30 @@ export default async function OrderDetail({
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-ink">
           Pedido #{order.id.slice(0, 8)}
         </h1>
-        <a
-          href={`/admin/pedidos/${order.id}/factura`}
-          className="rounded-full border border-brand-orange px-4 py-2 text-sm font-semibold text-brand-orange transition hover:bg-brand-orange/10"
-        >
-          Ver factura
-        </a>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={`/admin/pedidos/${order.id}/editar`}
+            className="rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold text-ink transition hover:bg-ink/5"
+          >
+            Editar
+          </Link>
+          <Link
+            href={`/admin/pedidos/${order.id}/factura`}
+            className="rounded-full border border-brand-orange px-4 py-2 text-sm font-semibold text-brand-orange transition hover:bg-brand-orange/10"
+          >
+            Ver factura
+          </Link>
+        </div>
       </div>
+      {sp.saved && (
+        <p className="mt-3 rounded-lg bg-brand-green/15 px-3 py-2 text-sm text-brand-green-dark">
+          Cambios guardados.
+        </p>
+      )}
 
       <div className="rounded-2xl border border-ink/10 bg-white p-6">
         <h2 className="font-bold text-ink">Productos</h2>
@@ -109,6 +127,18 @@ export default async function OrderDetail({
           Actualizar
         </button>
       </form>
+
+      <div className="rounded-2xl border border-red-200 bg-red-50/30 p-6">
+        <h3 className="font-bold text-ink">Zona de peligro</h3>
+        <p className="mt-1 text-sm text-ink/70">
+          Eliminar este pedido también borra todas sus líneas. No se puede
+          deshacer.
+        </p>
+        <DeleteOrderButton
+          orderId={order.id}
+          label={`pedido #${order.id.slice(0, 8)}`}
+        />
+      </div>
     </div>
   );
 }

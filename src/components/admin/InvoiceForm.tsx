@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createInvoice } from "@/app/admin/actions";
 import { SubmitButton } from "./SubmitButton";
 
 const SIZES = ["XS", "S", "M", "L", "XL"] as const;
@@ -24,28 +23,57 @@ function cop(n: number) {
 
 type Client = { id: string; name: string };
 
-export function InvoiceForm({ clients }: { clients: Client[] }) {
-  const [qty, setQty] = useState<Record<string, number>>({
-    XS: 0,
-    S: 0,
-    M: 0,
-    L: 0,
-    XL: 0,
-  });
+export type InvoiceInitial = {
+  orderId: string;
+  clientId: string;
+  date: string; // YYYY-MM-DD
+  quantities: Record<string, number>;
+  totalOverride: string; // empty if none
+  notes: string;
+};
+
+export function InvoiceForm({
+  clients,
+  initial,
+  action,
+  submitLabel = "Crear factura",
+  pendingLabel = "Creando factura…",
+}: {
+  clients: Client[];
+  initial?: InvoiceInitial;
+  action: (formData: FormData) => void | Promise<void>;
+  submitLabel?: string;
+  pendingLabel?: string;
+}) {
+  const [qty, setQty] = useState<Record<string, number>>(
+    initial?.quantities ?? { XS: 0, S: 0, M: 0, L: 0, XL: 0 },
+  );
   const subtotal = SIZES.reduce((s, k) => s + qty[k] * PRICES[k], 0);
 
-  const [totalOverride, setTotalOverride] = useState<string>("");
+  const [totalOverride, setTotalOverride] = useState<string>(
+    initial?.totalOverride ?? "",
+  );
   const totalNum =
     totalOverride === "" ? subtotal : Number(totalOverride) || 0;
   const hasPromo = totalOverride !== "" && totalNum !== subtotal;
 
-  const today = new Date().toISOString().slice(0, 10);
+  const defaultDate =
+    initial?.date ?? new Date().toISOString().slice(0, 10);
 
   return (
-    <form action={createInvoice} className="mt-6 space-y-6">
+    <form action={action} className="mt-6 space-y-6">
+      {initial && (
+        <input type="hidden" name="order_id" value={initial.orderId} />
+      )}
+
       <div>
         <label className="block text-sm font-medium text-ink/70">Cliente</label>
-        <select name="client_id" required className={`${input} mt-1`} defaultValue="">
+        <select
+          name="client_id"
+          required
+          className={`${input} mt-1`}
+          defaultValue={initial?.clientId ?? ""}
+        >
           <option value="" disabled>
             Selecciona un cliente…
           </option>
@@ -71,7 +99,7 @@ export function InvoiceForm({ clients }: { clients: Client[] }) {
         <input
           name="date"
           type="date"
-          defaultValue={today}
+          defaultValue={defaultDate}
           className={`${input} mt-1`}
         />
       </div>
@@ -91,7 +119,10 @@ export function InvoiceForm({ clients }: { clients: Client[] }) {
                 min="0"
                 value={qty[s]}
                 onChange={(e) =>
-                  setQty({ ...qty, [s]: Math.max(0, Number(e.target.value) || 0) })
+                  setQty({
+                    ...qty,
+                    [s]: Math.max(0, Number(e.target.value) || 0),
+                  })
                 }
                 className={inputSmall}
               />
@@ -122,7 +153,7 @@ export function InvoiceForm({ clients }: { clients: Client[] }) {
         />
         <p className="mt-1 text-xs text-ink/50">
           Déjalo en blanco para usar el subtotal. Si pones un valor distinto,
-          aparecerá como <b>"Total con promo"</b> en la factura.
+          aparecerá como <b>&quot;Total con promo&quot;</b> en la factura.
         </p>
         {hasPromo && (
           <p className="mt-1 text-xs font-semibold text-brand-green-dark">
@@ -135,11 +166,12 @@ export function InvoiceForm({ clients }: { clients: Client[] }) {
         name="notes"
         rows={3}
         placeholder="Notas (opcional)"
+        defaultValue={initial?.notes ?? ""}
         className={input}
       />
 
-      <SubmitButton disabled={subtotal === 0} pendingText="Creando factura…">
-        Crear factura
+      <SubmitButton disabled={subtotal === 0} pendingText={pendingLabel}>
+        {submitLabel}
       </SubmitButton>
     </form>
   );

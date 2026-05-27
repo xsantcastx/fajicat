@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { InvoiceForm } from "@/components/admin/InvoiceForm";
+import { createInvoice } from "@/app/admin/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +22,15 @@ export default async function NuevaFactura({
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-ink">Nueva factura</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-ink">Nueva factura</h1>
+        <Link
+          href="/admin/pedidos"
+          className="text-sm text-ink/60 hover:text-ink"
+        >
+          ← Volver
+        </Link>
+      </div>
       <p className="mt-1 text-ink/60">
         Crea una factura para un cliente. Las cantidades se calculan automáticamente
         y el total es editable para aplicar promociones.
@@ -30,7 +40,7 @@ export default async function NuevaFactura({
           {sp.error}
         </p>
       )}
-      <InvoiceForm clients={clients} />
+      <InvoiceForm clients={clients} action={createInvoice} />
     </div>
   );
 }

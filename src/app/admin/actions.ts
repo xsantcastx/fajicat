@@ -352,3 +352,124 @@ export async function createInvoice(formData: FormData) {
   revalidatePath("/admin/pedidos");
   redirect(`/admin/pedidos/${order.id}/factura`);
 }
+
+export async function updateInvoice(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("order_id") ?? "");
+  if (!id) redirect("/admin/pedidos");
+
+  const client_id = String(formData.get("client_id") ?? "");
+  if (!client_id) {
+    redirect(
+      `/admin/pedidos/${id}/editar?error=${encodeURIComponent("Selecciona un cliente")}`,
+    );
+  }
+
+  const { data: product } = await supabase
+    .from("products")
+    .select("id, name, variants:product_variants(id, size, price)")
+    .eq("slug", "faja-postquirurgica")
+    .maybeSingle();
+  if (!product) {
+    redirect(
+      `/admin/pedidos/${id}/editar?error=${encodeURIComponent("Producto no encontrado")}`,
+    );
+  }
+  const variants = ((product.variants ?? []) as VariantRow[]) || [];
+
+  type Item = {
+    variant_id: string;
+    product_name: string;
+    size: string;
+    unit_price: number;
+    quantity: number;
+    line_total: number;
+  };
+  const items: Item[] = [];
+  let subtotal = 0;
+
+  for (const size of INVOICE_SIZES) {
+    const qty = Math.max(0, Number(formData.get(`qty_${size}`) ?? 0));
+    if (qty <= 0) continue;
+    const v = variants.find((x) => x.size === size);
+    if (!v) continue;
+    const unit_price =
+      v.price != null ? Number(v.price) : INVOICE_PRICES[size];
+    const line_total = unit_price * qty;
+    subtotal += line_total;
+    items.push({
+      variant_id: v.id,
+      product_name: product.name,
+      size,
+      unit_price,
+      quantity: qty,
+      line_total,
+    });
+  }
+
+  if (items.length === 0) {
+    redirect(
+      `/admin/pedidos/${id}/editar?error=${encodeURIComponent("Agrega al menos una talla")}`,
+    );
+  }
+
+  const totalRaw = String(formData.get("total") ?? "").trim();
+  const total = totalRaw === "" ? subtotal : Number(totalRaw);
+  const promo_total = total !== subtotal ? total : null;
+
+  const { data: client } = await supabase
+    .from("clients")
+    .select("name, phone, email")
+    .eq("id", client_id)
+    .maybeSingle();
+
+  const dateStr = String(formData.get("date") ?? "");
+  const notes = String(formData.get("notes") ?? "") || null;
+
+  const orderPayload: Record<string, unknown> = {
+    client_id,
+    subtotal,
+    shipping: 0,
+    total,
+    promo_total,
+    contact_name: client?.name ?? null,
+    contact_phone: client?.phone ?? null,
+    contact_email: client?.email ?? null,
+    notes,
+  };
+  if (dateStr) {
+    orderPayload.created_at = new Date(`${dateStr}T12:00:00`).toISOString();
+  }
+
+  const { error: oErr } = await supabase
+    .from("orders")
+    .update(orderPayload)
+    .eq("id", id);
+  if (oErr) {
+    redirect(
+      `/admin/pedidos/${id}/editar?error=${encodeURIComponent(oErr.message)}`,
+    );
+  }
+
+  // Replace items: delete existing, insert new (cascade not needed; explicit).
+  await supabase.from("order_items").delete().eq("order_id", id);
+  await supabase
+    .from("order_items")
+    .insert(items.map((it) => ({ ...it, order_id: id })));
+
+  revalidatePath("/admin/pedidos");
+  revalidatePath(`/admin/pedidos/${id}`);
+  revalidatePath(`/admin/pedidos/${id}/factura`);
+  redirect(`/admin/pedidos/${id}?saved=1`);
+}
+
+export async function deleteOrderAction(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (id) {
+    // order_items cascade-delete via the FK in 0001_init.sql.
+    await supabase.from("orders").delete().eq("id", id);
+  }
+  revalidatePath("/admin/pedidos");
+  redirect("/admin/pedidos?deleted=1");
+}
