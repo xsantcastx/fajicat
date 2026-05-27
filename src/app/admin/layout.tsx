@@ -10,7 +10,9 @@ export const dynamic = "force-dynamic";
 const NAV: [string, string][] = [
   ["/admin", "Dashboard"],
   ["/admin/productos", "Productos"],
+  ["/admin/clientes", "Clientes"],
   ["/admin/pedidos", "Pedidos"],
+  ["/admin/facturas/nueva", "Nueva factura"],
 ];
 
 export default async function AdminLayout({

@@ -143,3 +143,142 @@ export async function deleteProductImage(
   await supabase.from("product_images").delete().eq("id", imageId);
   revalidatePath(`/admin/productos/${productId}`);
 }
+
+// ----- Clients (B2B/manual invoices) -----
+
+export async function createClientAction(formData: FormData) {
+  const supabase = await requireAdmin();
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) {
+    redirect(`/admin/clientes/nuevo?error=${encodeURIComponent("El nombre es obligatorio")}`);
+  }
+  const phone = String(formData.get("phone") ?? "") || null;
+  const email = String(formData.get("email") ?? "") || null;
+  const address = String(formData.get("address") ?? "") || null;
+  const notes = String(formData.get("notes") ?? "") || null;
+
+  const { error } = await supabase
+    .from("clients")
+    .insert({ name, phone, email, address, notes });
+  if (error) {
+    redirect(`/admin/clientes/nuevo?error=${encodeURIComponent(error.message)}`);
+  }
+  revalidatePath("/admin/clientes");
+  redirect("/admin/clientes");
+}
+
+// ----- Invoices (admin-created orders for stored clients) -----
+
+const INVOICE_SIZES = ["XS", "S", "M", "L", "XL"] as const;
+const INVOICE_PRICES: Record<string, number> = {
+  XS: 20000,
+  S: 21000,
+  M: 21000,
+  L: 23000,
+  XL: 27000,
+};
+
+type VariantRow = { id: string; size: string; price: number | string | null };
+
+export async function createInvoice(formData: FormData) {
+  const supabase = await requireAdmin();
+
+  const client_id = String(formData.get("client_id") ?? "");
+  if (!client_id) {
+    redirect(`/admin/facturas/nueva?error=${encodeURIComponent("Selecciona un cliente")}`);
+  }
+
+  // Fetch the faja product + its variants for accurate variant_id linking.
+  const { data: product } = await supabase
+    .from("products")
+    .select("id, name, variants:product_variants(id, size, price)")
+    .eq("slug", "faja-postquirurgica")
+    .maybeSingle();
+  if (!product) {
+    redirect(`/admin/facturas/nueva?error=${encodeURIComponent("Producto no encontrado")}`);
+  }
+  const variants = ((product.variants ?? []) as VariantRow[]) || [];
+
+  type Item = {
+    variant_id: string;
+    product_name: string;
+    size: string;
+    unit_price: number;
+    quantity: number;
+    line_total: number;
+  };
+  const items: Item[] = [];
+  let subtotal = 0;
+
+  for (const size of INVOICE_SIZES) {
+    const qty = Math.max(0, Number(formData.get(`qty_${size}`) ?? 0));
+    if (qty <= 0) continue;
+    const v = variants.find((x) => x.size === size);
+    if (!v) continue;
+    const unit_price =
+      v.price != null ? Number(v.price) : INVOICE_PRICES[size];
+    const line_total = unit_price * qty;
+    subtotal += line_total;
+    items.push({
+      variant_id: v.id,
+      product_name: product.name,
+      size,
+      unit_price,
+      quantity: qty,
+      line_total,
+    });
+  }
+
+  if (items.length === 0) {
+    redirect(`/admin/facturas/nueva?error=${encodeURIComponent("Agrega al menos una talla")}`);
+  }
+
+  const totalRaw = String(formData.get("total") ?? "").trim();
+  const total = totalRaw === "" ? subtotal : Number(totalRaw);
+  const promo_total = total !== subtotal ? total : null;
+
+  // Copy client contact info to the order snapshot (so the invoice still
+  // renders correctly even if the client record is edited/deleted later).
+  const { data: client } = await supabase
+    .from("clients")
+    .select("name, phone, email")
+    .eq("id", client_id)
+    .maybeSingle();
+
+  const dateStr = String(formData.get("date") ?? "");
+  const notes = String(formData.get("notes") ?? "") || null;
+
+  const orderPayload: Record<string, unknown> = {
+    client_id,
+    status: "paid",
+    channel: "web",
+    subtotal,
+    shipping: 0,
+    total,
+    promo_total,
+    currency: "COP",
+    contact_name: client?.name ?? null,
+    contact_phone: client?.phone ?? null,
+    contact_email: client?.email ?? null,
+    notes,
+  };
+  if (dateStr) {
+    orderPayload.created_at = new Date(`${dateStr}T12:00:00`).toISOString();
+  }
+
+  const { data: order, error: oErr } = await supabase
+    .from("orders")
+    .insert(orderPayload)
+    .select("id")
+    .single();
+  if (oErr || !order) {
+    redirect(`/admin/facturas/nueva?error=${encodeURIComponent(oErr?.message ?? "No se pudo crear la factura")}`);
+  }
+
+  await supabase
+    .from("order_items")
+    .insert(items.map((it) => ({ ...it, order_id: order.id })));
+
+  revalidatePath("/admin/pedidos");
+  redirect(`/admin/pedidos/${order.id}/factura`);
+}

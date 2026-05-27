@@ -222,7 +222,14 @@ export default async function FacturaPage({
             {shipping > 0 && (
               <div className="row">Envío: {formatCOP(shipping)}</div>
             )}
-            <div className="row">Total: {formatCOP(total)}</div>
+            {order.promo_total != null &&
+            Number(order.promo_total) !== subtotal ? (
+              <div className="row">
+                Total con promo: {formatCOP(Number(order.promo_total))}
+              </div>
+            ) : (
+              <div className="row">Total: {formatCOP(total)}</div>
+            )}
           </div>
         </div>
 
