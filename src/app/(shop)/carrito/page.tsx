@@ -60,45 +60,50 @@ export default function CarritoPage() {
 
       <ul className="mt-6 divide-y divide-ink/10">
         {items.map((i) => (
-          <li key={i.variantId} className="flex items-center gap-4 py-4">
-            <div className="flex-1">
+          <li
+            key={i.variantId}
+            className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:gap-4"
+          >
+            <div className="min-w-0 flex-1">
               <p className="font-semibold text-ink">{i.productName}</p>
               <p className="text-sm text-ink/60">
                 Talla {i.size} · {formatCOP(i.unitPrice)}
               </p>
             </div>
-            <div className="flex items-center rounded-lg border border-ink/15">
+            <div className="flex items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center rounded-lg border border-ink/15">
+                <button
+                  type="button"
+                  onClick={() => setQty(i.variantId, i.quantity - 1)}
+                  className="px-3 py-1.5"
+                  aria-label="Restar"
+                >
+                  −
+                </button>
+                <span className="w-8 text-center text-sm font-semibold">
+                  {i.quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQty(i.variantId, i.quantity + 1)}
+                  className="px-3 py-1.5"
+                  aria-label="Sumar"
+                >
+                  +
+                </button>
+              </div>
+              <div className="font-semibold text-ink sm:w-24 sm:text-right">
+                {formatCOP(i.unitPrice * i.quantity)}
+              </div>
               <button
                 type="button"
-                onClick={() => setQty(i.variantId, i.quantity - 1)}
-                className="px-2.5 py-1"
-                aria-label="Restar"
+                onClick={() => remove(i.variantId)}
+                className="text-ink/40 transition hover:text-red-500"
+                aria-label="Quitar"
               >
-                −
-              </button>
-              <span className="w-8 text-center text-sm font-semibold">
-                {i.quantity}
-              </span>
-              <button
-                type="button"
-                onClick={() => setQty(i.variantId, i.quantity + 1)}
-                className="px-2.5 py-1"
-                aria-label="Sumar"
-              >
-                +
+                ✕
               </button>
             </div>
-            <div className="w-24 text-right font-semibold text-ink">
-              {formatCOP(i.unitPrice * i.quantity)}
-            </div>
-            <button
-              type="button"
-              onClick={() => remove(i.variantId)}
-              className="text-ink/40 transition hover:text-red-500"
-              aria-label="Quitar"
-            >
-              ✕
-            </button>
           </li>
         ))}
       </ul>
