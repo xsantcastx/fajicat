@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { logout } from "@/app/auth/actions";
 import { Logo } from "@/components/brand/Logo";
+import { MobileNav } from "@/components/admin/MobileNav";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,8 @@ export default async function AdminLayout({
   if (profile?.role !== "admin") redirect("/");
 
   return (
-    <div className="flex min-h-screen bg-cream">
+    <div className="flex min-h-screen flex-col bg-cream sm:flex-row">
+      <MobileNav items={NAV} />
       <aside className="hidden w-56 flex-col border-r border-ink/10 bg-white p-5 sm:flex print:hidden">
         <Link href="/admin">
           <Logo showTagline={false} />
@@ -66,7 +68,7 @@ export default async function AdminLayout({
           </form>
         </div>
       </aside>
-      <main className="flex-1 p-6 sm:p-10">{children}</main>
+      <main className="flex-1 p-4 sm:p-10">{children}</main>
     </div>
   );
 }

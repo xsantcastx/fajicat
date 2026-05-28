@@ -186,6 +186,7 @@ export default async function FacturaPage({
         <PrintButton />
       </div>
 
+      <div className="-mx-4 overflow-x-auto sm:mx-0 print:mx-0 print:overflow-visible">
       <div className="factura-page">
         <div className="corner-tl"></div>
         <div className="corner-tl-tab"></div>
@@ -275,6 +276,7 @@ export default async function FacturaPage({
         <div className="mtn-orange"></div>
         <div className="mtn-black"></div>
         <div className="footer-bar"></div>
+      </div>
       </div>
     </>
   );

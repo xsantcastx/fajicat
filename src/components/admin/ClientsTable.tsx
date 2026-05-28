@@ -36,7 +36,7 @@ export function ClientsTable({ clients }: { clients: ClientRow[] }) {
         />
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-ink/10 bg-white">
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-ink/10 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-cream text-left text-ink/60">
             <tr>
