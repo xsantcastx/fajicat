@@ -1,17 +1,29 @@
--- Fajicat initial schema + Row-Level Security
--- Run once in the Supabase SQL editor (or via `supabase db push`).
+-- Fajicat initial schema + Row-Level Security.
+-- Idempotent: safe to re-run against an already-applied database. Every
+-- CREATE guards against duplicate objects so `supabase db push` doesn't
+-- error out if the schema was seeded by hand before the CLI took over.
 
 create extension if not exists "pgcrypto";
 
 -- ------------------------------------------------------------------ enums
-create type product_status as enum ('draft', 'active', 'archived');
-create type order_status as enum ('pending', 'paid', 'shipped', 'delivered', 'cancelled');
-create type order_channel as enum ('web', 'whatsapp');
-create type user_role as enum ('customer', 'admin');
+do $$ begin
+  create type product_status as enum ('draft', 'active', 'archived');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type order_status as enum ('pending', 'paid', 'shipped', 'delivered', 'cancelled');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type order_channel as enum ('web', 'whatsapp');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type user_role as enum ('customer', 'admin');
+exception when duplicate_object then null; end $$;
 
 -- --------------------------------------------------------------- profiles
--- 1:1 with auth.users; holds role + contact info.
-create table public.profiles (
+create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   full_name text,
   phone text,
@@ -20,8 +32,7 @@ create table public.profiles (
 );
 
 -- ------------------------------------------------------------- categories
--- Animal type: Gatos, Perros, etc.
-create table public.categories (
+create table if not exists public.categories (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null,
   name text not null,
@@ -30,20 +41,20 @@ create table public.categories (
 );
 
 -- --------------------------------------------------------------- products
-create table public.products (
+create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null,
   name text not null,
   description text,
   category_id uuid references public.categories (id) on delete set null,
-  base_price numeric(12, 2) not null default 0, -- COP
+  base_price numeric(12, 2) not null default 0,
   status product_status not null default 'draft',
   featured boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
-create table public.product_images (
+create table if not exists public.product_images (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references public.products (id) on delete cascade,
   url text not null,
@@ -51,8 +62,7 @@ create table public.product_images (
   position int not null default 0
 );
 
--- Size variants (XS..XL). price null => fall back to product.base_price.
-create table public.product_variants (
+create table if not exists public.product_variants (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references public.products (id) on delete cascade,
   size text not null,
@@ -65,7 +75,7 @@ create table public.product_variants (
 );
 
 -- ----------------------------------------------------------------- orders
-create table public.orders (
+create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users (id) on delete set null,
   status order_status not null default 'pending',
@@ -86,8 +96,7 @@ create table public.orders (
   updated_at timestamptz not null default now()
 );
 
--- Line items store snapshots so past orders never change when products do.
-create table public.order_items (
+create table if not exists public.order_items (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references public.orders (id) on delete cascade,
   variant_id uuid references public.product_variants (id) on delete set null,
@@ -107,8 +116,11 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_products_updated on public.products;
 create trigger trg_products_updated before update on public.products
   for each row execute function public.set_updated_at();
+
+drop trigger if exists trg_orders_updated on public.orders;
 create trigger trg_orders_updated before update on public.orders
   for each row execute function public.set_updated_at();
 
@@ -126,6 +138,7 @@ begin
 end;
 $$;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
@@ -149,24 +162,36 @@ alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 
 -- profiles
+drop policy if exists "profiles self or admin read" on public.profiles;
 create policy "profiles self or admin read" on public.profiles
   for select using (auth.uid() = id or public.is_admin());
+
+drop policy if exists "profiles self update" on public.profiles;
 create policy "profiles self update" on public.profiles
   for update using (auth.uid() = id) with check (auth.uid() = id);
+
+drop policy if exists "profiles admin write" on public.profiles;
 create policy "profiles admin write" on public.profiles
   for all using (public.is_admin()) with check (public.is_admin());
 
 -- catalog: anyone can read active products; only admins write
+drop policy if exists "categories public read" on public.categories;
 create policy "categories public read" on public.categories
   for select using (true);
+
+drop policy if exists "categories admin write" on public.categories;
 create policy "categories admin write" on public.categories
   for all using (public.is_admin()) with check (public.is_admin());
 
+drop policy if exists "products public read active" on public.products;
 create policy "products public read active" on public.products
   for select using (status = 'active' or public.is_admin());
+
+drop policy if exists "products admin write" on public.products;
 create policy "products admin write" on public.products
   for all using (public.is_admin()) with check (public.is_admin());
 
+drop policy if exists "product_images public read" on public.product_images;
 create policy "product_images public read" on public.product_images
   for select using (
     exists (
@@ -174,9 +199,12 @@ create policy "product_images public read" on public.product_images
       where p.id = product_id and (p.status = 'active' or public.is_admin())
     )
   );
+
+drop policy if exists "product_images admin write" on public.product_images;
 create policy "product_images admin write" on public.product_images
   for all using (public.is_admin()) with check (public.is_admin());
 
+drop policy if exists "variants public read" on public.product_variants;
 create policy "variants public read" on public.product_variants
   for select using (
     exists (
@@ -184,17 +212,23 @@ create policy "variants public read" on public.product_variants
       where p.id = product_id and (p.status = 'active' or public.is_admin())
     )
   );
+
+drop policy if exists "variants admin write" on public.product_variants;
 create policy "variants admin write" on public.product_variants
   for all using (public.is_admin()) with check (public.is_admin());
 
 -- orders: customers read their own; admins read all. Orders are CREATED
--- server-side with the service-role key (price/stock validated there), so we
--- intentionally do not expose a broad client INSERT policy.
+-- server-side with the service-role key (price/stock validated there), so
+-- we intentionally do not expose a broad client INSERT policy.
+drop policy if exists "orders own read" on public.orders;
 create policy "orders own read" on public.orders
   for select using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "orders admin write" on public.orders;
 create policy "orders admin write" on public.orders
   for all using (public.is_admin()) with check (public.is_admin());
 
+drop policy if exists "order_items own read" on public.order_items;
 create policy "order_items own read" on public.order_items
   for select using (
     exists (
@@ -202,5 +236,7 @@ create policy "order_items own read" on public.order_items
       where o.id = order_id and (o.user_id = auth.uid() or public.is_admin())
     )
   );
+
+drop policy if exists "order_items admin write" on public.order_items;
 create policy "order_items admin write" on public.order_items
   for all using (public.is_admin()) with check (public.is_admin());

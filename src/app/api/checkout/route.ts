@@ -145,9 +145,25 @@ export async function POST(request: Request) {
     );
   }
 
-  await admin
+  const { error: itemsError } = await admin
     .from("order_items")
     .insert(orderItems.map((oi) => ({ ...oi, order_id: order.id })));
+
+  if (itemsError) {
+    // Roll back the orphan order so we don't ship a pending row with no lines.
+    // Swallow the delete result — even if it fails the row is harmless
+    // (status=pending, will be reaped by any cleanup job).
+    console.error("[checkout] order_items insert failed:", itemsError);
+    await admin.from("orders").delete().eq("id", order.id);
+    return NextResponse.json(
+      { error: "No se pudo crear el pedido." },
+      { status: 500 },
+    );
+  }
+
+  // MP rejects `auto_return: "approved"` unless every back_url is HTTPS —
+  // so we only enable it when SITE is HTTPS (i.e. deployed, not localhost).
+  const isHttps = SITE.startsWith("https://");
 
   try {
     const pref = await new Preference(mpClient()).create({
@@ -178,7 +194,7 @@ export async function POST(request: Request) {
           failure: `${SITE}/checkout/error`,
           pending: `${SITE}/checkout/pendiente`,
         },
-        auto_return: "approved",
+        ...(isHttps ? { auto_return: "approved" as const } : {}),
         notification_url: `${SITE}/api/webhooks/mercadopago`,
         payer: {
           name: contact.name || undefined,
@@ -189,13 +205,15 @@ export async function POST(request: Request) {
 
     const url = pref.init_point ?? pref.sandbox_init_point;
     if (!url) {
+      console.error("[checkout] MP preference missing init_point", pref);
       return NextResponse.json(
         { error: "No se pudo iniciar el pago." },
         { status: 500 },
       );
     }
     return NextResponse.json({ url });
-  } catch {
+  } catch (err) {
+    console.error("[checkout] MP preference create failed:", err);
     return NextResponse.json(
       { error: "No se pudo iniciar el pago." },
       { status: 500 },
