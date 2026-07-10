@@ -76,8 +76,11 @@ export async function POST(request: Request) {
     paymentStatus = payment.status;
     orderId = payment.external_reference;
     paymentId = payment.id;
-  } catch {
-    return NextResponse.json({ ok: true });
+  } catch (err) {
+    // Returning non-2xx tells MP to retry — otherwise a transient failure
+    // fetching this payment means the order sits pending forever.
+    console.error("[mp-webhook] payment.get failed:", err);
+    return new NextResponse("payment fetch failed", { status: 500 });
   }
 
   if (!orderId) return NextResponse.json({ ok: true });
